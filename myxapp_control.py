@@ -44,14 +44,19 @@ def xappLogic():
         rnti = input("Enter RNTI:")
         rnti = int(rnti)
 
-        prop_1 = input("Is prop_1 true? (y/n)")
-        if prop_1 == "y":
-            prop_1 = True
-        else:
-            prop_1 = False
-        prop_2 = float(input("Enter prop_2 (float)"))
+        #prop_1 = input("Is prop_1 true? (y/n)")
+        #if prop_1 == "y":
+        #    prop_1 = True
+        #else:
+        #    prop_1 = False
+        #prop_2 = float(input("Enter prop_2 (float)")) 
+        
+        #rnti = int(input("Enter RNTI: "))
 
-        control_buffer = e2sm_control_request_buffer(rnti, prop_1, prop_2)
+        force_mcs = input("Force MCS? (y/n): ") == "y"
+        target_mcs = int(input("Target MCS: "))
+
+        control_buffer = e2sm_control_request_buffer(rnti, force_mcs, target_mcs)
         connector.send_e2ap_control_request(control_buffer, gnb)
         print("Control request sent, waiting 1 second before repeating the loop...")
 
@@ -66,7 +71,7 @@ def e2sm_report_request_buffer():
     buf = master_mess.SerializeToString()
     return buf
 
-def e2sm_control_request_buffer(rnti, prop_1, prop_2):
+def e2sm_control_request_buffer(rnti, force_mcs, target_mcs):
     master_mess = RAN_message()
     master_mess.msg_type = RAN_message_type.CONTROL
     inner_mess = RAN_control_request()
@@ -82,8 +87,10 @@ def e2sm_control_request_buffer(rnti, prop_1, prop_2):
     # ue info message
     ue_info_message = ue_info_m()
     ue_info_message.rnti = rnti
-    ue_info_message.prop_1 = prop_1
-    ue_info_message.prop_2 = prop_2
+    #ue_info_message.prop_1 = prop_1
+    #ue_info_message.prop_2 = prop_2 
+    ue_info_message.force_mcs = force_mcs
+    ue_info_message.target_mcs = target_mcs
 
     # put info message into repeated field of ue list message
     ue_list_message.ue_info.extend([ue_info_message])
